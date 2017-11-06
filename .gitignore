@@ -1,0 +1,10 @@
+/*.project
+/target/
+/build
+/.settings
+/*.classpath
+/.settings/
+*.iml
+/.DS_Store
+*.DS_Store
+/sources/
