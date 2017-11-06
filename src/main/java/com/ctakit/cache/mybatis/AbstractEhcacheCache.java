@@ -1,16 +1,17 @@
 package com.ctakit.cache.mybatis;
 
+import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.concurrent.locks.ReadWriteLock;
 
-import javax.cache.CacheManager;
 import javax.cache.Caching;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.ibatis.cache.Cache;
-import org.ehcache.config.CacheRuntimeConfiguration;
+import org.ehcache.config.CacheConfiguration;
 import org.ehcache.config.ResourceType;
-import org.ehcache.jsr107.Eh107Configuration;
+import org.ehcache.core.EhcacheManager;
 
 /**
  * Cache adapter for Ehcache.
@@ -23,12 +24,12 @@ public abstract class AbstractEhcacheCache implements Cache {
 	 * The cache manager reference.
 	 */
 
-	protected CacheManager myCacheManager = null;
+	protected EhcacheManager ehcacheManager = null;
 
-	protected javax.cache.Cache<Object, Object> cache = null;
-	
-	 private final ReadWriteLock readWriteLock = new DummyReadWriteLock();
+	protected org.ehcache.Cache<String, Object> cache = null;
+	protected CacheConfiguration<?, ?> cacheConfiguration = null;
 
+	private final ReadWriteLock readWriteLock = new DummyReadWriteLock();
 
 	/**
 	 * The cache id (namespace).
@@ -45,22 +46,47 @@ public abstract class AbstractEhcacheCache implements Cache {
 	 *            the chache id (namespace)
 	 */
 	public AbstractEhcacheCache(final String id) {
-		if (myCacheManager == null) {
+		if (ehcacheManager == null) {
 			URL myUrl = getClass().getResource("/ehcache.xml");
 			try {
-				myCacheManager = (CacheManager) Caching.getCachingProvider().getCacheManager(myUrl.toURI(), null, null);
-			} catch (URISyntaxException e) {
+				ehcacheManager = getEhcacheManager(
+						Caching.getCachingProvider().getCacheManager(myUrl.toURI(), null, null));
+			} catch (URISyntaxException | IllegalAccessException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
-			
 		}
 
 		if (id == null) {
 			throw new IllegalArgumentException("Cache instances require an ID");
 		}
 		this.id = id;
+	}
+
+	/**
+	 * Instantiates a new ehcache cache.
+	 *
+	 * @param id
+	 *            the id
+	 */
+
+	public static EhcacheManager getEhcacheManager(Object target) throws IllegalAccessException {
+
+		Field field = FieldUtils.getField(target.getClass(), "ehCacheManager", true);
+		Object value = null;
+		if (field != null) {
+			if (field.isAccessible()) {
+				value = field.get(target);
+			} else {
+				field.setAccessible(true);
+				value = field.get(target);
+				field.setAccessible(false);
+			}
+		}
+		return (EhcacheManager) value;
+
+		// return FieldUtils.readField(target, fieldName,true);
 	}
 
 	/**
@@ -95,12 +121,9 @@ public abstract class AbstractEhcacheCache implements Cache {
 	/**
 	 * {@inheritDoc}
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public int getSize() {
-		 CacheRuntimeConfiguration<Object, Object> ehcacheConfig = (CacheRuntimeConfiguration<Object, Object>)cache.getConfiguration(
-			    Eh107Configuration.class).unwrap(CacheRuntimeConfiguration.class); 
-		 Long size = ehcacheConfig.getResourcePools().getPoolForResource(ResourceType.Core.HEAP).getSize(); 
+		Long size = cacheConfiguration.getResourcePools().getPoolForResource(ResourceType.Core.HEAP).getSize();
 		return size.intValue();
 	}
 
@@ -109,10 +132,10 @@ public abstract class AbstractEhcacheCache implements Cache {
 	 */
 	@Override
 	public void putObject(Object key, Object value) {
-		if(key!=null&&value!=null) {
+		if (key != null && value != null) {
 			cache.put(key.toString(), value);
 		}
-		
+
 	}
 
 	/**

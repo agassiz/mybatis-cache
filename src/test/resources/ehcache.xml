@@ -1,0 +1,31 @@
+<config
+  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+  xmlns='http://www.ehcache.org/v3'
+  xmlns:jsr107='http://www.ehcache.org/v3/jsr107'>
+
+    <service>
+        <jsr107:defaults enable-management="true" enable-statistics="true" default-template="heap-cache" />
+    </service>
+    
+    <!-- 定义一个自己的默认的 cache,(mybatis 只会把这个作为 mapper缓存中默认的配置信息，别名还是mapper对应的命名空间) -->
+     <cache alias="default" uses-template="heap-cache"/> 
+
+    <cache-template name="heap-cache">
+        <listeners>
+            <listener>
+                <class>com.ctakit.cache.mybatis.EhcacheEventLogger</class>
+                <event-firing-mode>ASYNCHRONOUS</event-firing-mode>
+                <event-ordering-mode>UNORDERED</event-ordering-mode>
+                <events-to-fire-on>CREATED</events-to-fire-on>
+                <events-to-fire-on>UPDATED</events-to-fire-on>
+                <events-to-fire-on>EXPIRED</events-to-fire-on>
+                <events-to-fire-on>REMOVED</events-to-fire-on>
+                <events-to-fire-on>EVICTED</events-to-fire-on>
+            </listener>
+        </listeners>
+        <resources>
+            <heap unit="entries">2000</heap>
+            <offheap unit="MB">100</offheap>
+        </resources>
+    </cache-template>
+</config>

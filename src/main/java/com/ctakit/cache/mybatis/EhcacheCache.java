@@ -1,43 +1,42 @@
 package com.ctakit.cache.mybatis;
 
-import javax.cache.configuration.CompleteConfiguration;
-
-import org.ehcache.config.CacheConfiguration;
-import org.ehcache.config.CacheRuntimeConfiguration;
-import org.ehcache.config.builders.CacheConfigurationBuilder;
-import org.ehcache.config.builders.ResourcePoolsBuilder;
-import org.ehcache.jsr107.Eh107Configuration;
+import org.apache.ibatis.cache.CacheKey;
+import org.ehcache.Cache;
 
 public class EhcacheCache extends AbstractEhcacheCache {
-	public EhcacheCache(String id) {
+	@SuppressWarnings("unchecked")
+	public <K, V> EhcacheCache(String id) {
 		super(id);
-		cache = myCacheManager.getCache(id);
+
+		cacheConfiguration = ehcacheManager.getRuntimeConfiguration().getCacheConfigurations().get(id);
+
+		if (cacheConfiguration == null) {
+			cacheConfiguration = ehcacheManager.getRuntimeConfiguration().getCacheConfigurations().get("default");
+		}
+		cache = (Cache<String, Object>) ehcacheManager.getCache(id, cacheConfiguration.getKeyType(),
+				cacheConfiguration.getValueType());
+
 		if (cache == null) {
-
-			CacheConfiguration<Object, Object> cacheConfiguration = CacheConfigurationBuilder
-					.newCacheConfigurationBuilder(Object.class, Object.class, ResourcePoolsBuilder.heap(10)).build();
-			cache = myCacheManager.createCache(id, Eh107Configuration.fromEhcacheCacheConfiguration(cacheConfiguration));
-
-			Eh107Configuration<Object, Object> configuration = cache.getConfiguration(Eh107Configuration.class);
-			configuration.unwrap(CacheConfiguration.class);
-
-			configuration.unwrap(CacheRuntimeConfiguration.class);
-
-			try {
-				cache.getConfiguration(CompleteConfiguration.class);
-				throw new AssertionError("IllegalArgumentException expected");
-			} catch (IllegalArgumentException iaex) {
-				// Expected
-			}
-		} 
+			cache = (Cache<String, Object>) ehcacheManager.createCache(id, cacheConfiguration);
+		}
 
 	}
+	
+	
+	public static void main(String[] args) {
+		
 
-	/**
-	 * Instantiates a new ehcache cache.
-	 *
-	 * @param id
-	 *            the id
-	 */
+		
+		EhcacheCache d = new EhcacheCache("tttt");
+		
+		  CacheKey cacheKey = new CacheKey();
+		    cacheKey.update("1111");
+		    
+		
+		
+		d.putObject(cacheKey, "22222");
+		System.out.println("test"+d.getObject(cacheKey));
+	}
+
 
 }
