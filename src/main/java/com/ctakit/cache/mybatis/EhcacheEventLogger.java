@@ -13,7 +13,7 @@ public class EhcacheEventLogger implements CacheEventListener<Object, Object> {
 
 	public EhcacheEventLogger() {
 		if (LOGGER.isDebugEnabled()) {
-			LOGGER.info("init EhcacheEventLogger");
+			LOGGER.debug("init EhcacheEventLogger");
 		}
 	}
 
