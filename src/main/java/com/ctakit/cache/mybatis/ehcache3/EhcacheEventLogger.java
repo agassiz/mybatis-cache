@@ -1,4 +1,4 @@
-package com.ctakit.cache.mybatis;
+package com.ctakit.cache.mybatis.ehcache3;
 
 import org.ehcache.event.CacheEvent;
 import org.ehcache.event.CacheEventListener;

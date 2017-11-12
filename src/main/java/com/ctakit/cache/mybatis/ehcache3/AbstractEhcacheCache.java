@@ -1,4 +1,4 @@
-package com.ctakit.cache.mybatis;
+package com.ctakit.cache.mybatis.ehcache3;
 
 import java.lang.reflect.Field;
 import java.net.URISyntaxException;
@@ -12,6 +12,8 @@ import org.apache.ibatis.cache.Cache;
 import org.ehcache.config.CacheConfiguration;
 import org.ehcache.config.ResourceType;
 import org.ehcache.core.EhcacheManager;
+
+import com.ctakit.cache.mybatis.DummyReadWriteLock;
 
 /**
  * Cache adapter for Ehcache.
@@ -95,7 +97,6 @@ public abstract class AbstractEhcacheCache implements Cache {
 	@Override
 	public void clear() {
 		cache.clear();
-		;
 	}
 
 	/**

@@ -1,6 +1,5 @@
-package com.ctakit.cache.mybatis;
+package com.ctakit.cache.mybatis.ehcache3;
 
-import org.apache.ibatis.cache.CacheKey;
 import org.ehcache.Cache;
 
 public class EhcacheCache extends AbstractEhcacheCache {
@@ -21,22 +20,5 @@ public class EhcacheCache extends AbstractEhcacheCache {
 		}
 
 	}
-	
-	
-	public static void main(String[] args) {
-		
-
-		
-		EhcacheCache d = new EhcacheCache("tttt");
-		
-		  CacheKey cacheKey = new CacheKey();
-		    cacheKey.update("1111");
-		    
-		
-		
-		d.putObject(cacheKey, "22222");
-		System.out.println("test"+d.getObject(cacheKey));
-	}
-
 
 }
